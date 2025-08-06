@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rewriter Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen p-4">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-700">Rewriter Agent</h1>
+
+    <label class="block mb-2 font-semibold text-gray-700">Original Text:</label>
+    <textarea id="originalText" class="w-full p-3 border rounded mb-4" placeholder="Enter your text or upload a .txt file..."></textarea>
+
+    <input type="file" id="fileUpload" accept=".txt" class="mb-4 w-full" />
+
+    <button id="rewriteButton" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Rewrite</button>
+
+    <label class="block mt-6 mb-2 font-semibold text-gray-700">Rewritten Text:</label>
+    <textarea id="rewrittenText" class="w-full p-3 border rounded bg-gray-100" readonly></textarea>
+  </div>
+
+  <script>
+    const button = document.getElementById('rewriteButton');
+    const inputText = document.getElementById('originalText');
+    const outputText = document.getElementById('rewrittenText');
+    const fileUpload = document.getElementById('fileUpload');
+
+    fileUpload.addEventListener('change', () => {
+      const file = fileUpload.files[0];
+      if (file && file.type === "text/plain") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          inputText.value = e.target.result;
+        };
+        reader.readAsText(file);
+      } else {
+        alert("Please upload a valid .txt file.");
+      }
+    });
+
+    button.addEventListener('click', async () => {
+      const text = inputText.value.trim();
+      if (!text) return alert("Please enter some text.");
+
+      button.textContent = "Rewriting...";
+      button.disabled = true;
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/rewrite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+        outputText.value = data.rewritten_text || "Error occurred.";
+      } catch (err) {
+        outputText.value = "Failed to connect to server.";
+      }
+
+      button.textContent = "Rewrite";
+      button.disabled = false;
+    });
+  </script>
+</body>
+</html>
