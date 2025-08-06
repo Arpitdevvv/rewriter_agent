@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import google.generativeai as genai
 import time
@@ -35,9 +35,9 @@ def rewrite_text():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/")
+@app.route('/')
 def index():
-    return "Rewriter Agent is running!"
+    return render_template("rewriter_agent.html")
 
 if __name__ == "__main__":
    port = int(os.environ.get("PORT", 10000))
